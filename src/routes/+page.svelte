@@ -1,14 +1,83 @@
-<script>
+<script lang="ts">
   import logo from '$lib/assets/logo.png';
+  import dimsumGorengKeju from '$lib/assets/dimsum goreng keju.jpg';
+  import dimsumMentai from '$lib/assets/dimsum mentai.jpg';
+  import dimsumOriginal from '$lib/assets/dimsum original.jpg';
+  import gyoza from '$lib/assets/gyoza.jpg';
   import { onMount } from 'svelte';
 
   let isMenuOpen = false;
   let showScrollTop = false;
   let currentSlide = 0;
+  let currentHeroSlide = 0;
+  
+  // Hero slideshow data
+  const heroSlides = [
+    {
+      image: dimsumMentai,
+      title: 'Dimsum Mentai',
+      subtitle: 'Signature Dish ⭐',
+      price: 'Rp 30.000',
+      badge: '🔥 BESTSELLER',
+      label: 'Most Popular'
+    },
+    {
+      image: gyoza,
+      title: 'Gyoza Premium',
+      subtitle: 'Crispy & Juicy 🥟',
+      price: 'Rp 32.000',
+      badge: '⭐ PREMIUM',
+      label: 'Chef\'s Choice'
+    },
+    {
+      image: dimsumGorengKeju,
+      title: 'Dimsum Goreng Keju',
+      subtitle: 'Cheesy Delight 🧀',
+      price: 'Rp 28.000',
+      badge: '🧀 CHEESY',
+      label: 'Customer Favorite'
+    },
+    {
+      image: dimsumOriginal,
+      title: 'Dimsum Original',
+      subtitle: 'Classic Taste 🥢',
+      price: 'Rp 25.000',
+      badge: '👑 CLASSIC',
+      label: 'Traditional'
+    }
+  ];
+  
+  // Hero slideshow functionality
+  let heroIntervalId: number;
+  let isHeroPaused = false;
+  
+  function nextHeroSlide() {
+    currentHeroSlide = (currentHeroSlide + 1) % heroSlides.length;
+  }
+  
+  function pauseHeroSlideshow() {
+    isHeroPaused = true;
+  }
+  
+  function resumeHeroSlideshow() {
+    isHeroPaused = false;
+  }
+  
+  function goToHeroSlide(index: number) {
+    currentHeroSlide = index;
+  }
   
   // Slideshow functionality
   function nextSlide() {
-    currentSlide = (currentSlide + 1) % 3; // assuming 3 slides
+    currentSlide = (currentSlide + 1) % 4; // 4 slides now
+  }
+  
+  function prevSlide() {
+    currentSlide = currentSlide === 0 ? 3 : currentSlide - 1;
+  }
+  
+  function goToSlide(index: number) {
+    currentSlide = index;
   }
   
   // Toggle mobile menu
@@ -34,12 +103,20 @@
     
     window.addEventListener('scroll', handleScroll);
     
-    // Auto-slide every 5 seconds
-    const interval = setInterval(nextSlide, 5000);
+    // Auto-slide every 5 seconds for about section slideshow
+    const aboutSlideInterval = setInterval(nextSlide, 5000);
+    
+    // Auto-slide every 5 seconds for hero section (with pause/resume support)
+    heroIntervalId = setInterval(() => {
+      if (!isHeroPaused) {
+        nextHeroSlide();
+      }
+    }, 5000);
     
     return () => {
       window.removeEventListener('scroll', handleScroll);
-      clearInterval(interval);
+      clearInterval(aboutSlideInterval);
+      clearInterval(heroIntervalId);
     };
   });
 </script>
@@ -334,15 +411,87 @@
             </div>
           </div>
           <div class="relative">
-            <div
-              class="bg-gradient-to-br from-yellow-300 to-orange-400 rounded-3xl p-8 shadow-2xl"
+            <!-- Main Hero Image with Auto-Change -->
+            <div 
+              class="relative rounded-3xl overflow-hidden shadow-2xl hover:shadow-3xl transition-all duration-500 group"
+              role="region"
+              aria-label="Hero slideshow"
+              on:mouseenter={pauseHeroSlideshow}
+              on:mouseleave={resumeHeroSlideshow}
             >
-              <div class="text-center text-white">
-                <div class="text-8xl mb-4">🍖</div>
-                <p class="text-lg font-medium">Gambar Produk</p>
-                <p class="text-sm opacity-90">Segera Hadir</p>
+              {#key currentHeroSlide}
+                <img
+                  src={heroSlides[currentHeroSlide].image}
+                  alt="{heroSlides[currentHeroSlide].title} - {heroSlides[currentHeroSlide].subtitle}"
+                  class="w-full h-80 object-cover group-hover:scale-105 transition-all duration-1000 ease-in-out"
+                  style="animation: fadeInScale 0.8s ease-out;"
+                />
+              {/key}
+              <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+              
+              <!-- Dynamic Badge -->
+              {#key currentHeroSlide}
+                <div class="absolute top-4 left-4 bg-yellow-400 text-red-600 px-3 py-1 rounded-full text-sm font-bold shadow-lg animate-fadeInUp">
+                  {heroSlides[currentHeroSlide].badge}
+                </div>
+              {/key}
+              
+              <!-- Dynamic Content -->
+              <div class="absolute bottom-4 left-4 text-white">
+                {#key currentHeroSlide}
+                  <div class="animate-slideUp">
+                    <h3 class="text-2xl font-bold mb-1">
+                      {heroSlides[currentHeroSlide].title}
+                    </h3>
+                    <p class="text-sm opacity-90">
+                      {heroSlides[currentHeroSlide].subtitle}
+                    </p>
+                    <div class="flex items-center mt-2">
+                      <span class="text-yellow-300 text-lg font-bold">
+                        {heroSlides[currentHeroSlide].price}
+                      </span>
+                      <span class="ml-2 text-xs bg-white/20 px-2 py-1 rounded transition-all duration-500">
+                        {heroSlides[currentHeroSlide].label}
+                      </span>
+                    </div>
+                  </div>
+                {/key}
               </div>
+              
+              <!-- Hero Slide Indicators -->
+              <div class="absolute bottom-4 right-4 flex space-x-2 z-40">
+                {#each heroSlides as _, i}
+                <button
+                  on:click={() => goToHeroSlide(i)}
+                  aria-label="Go to hero slide {i + 1}"
+                  class="w-3 h-3 rounded-full transition-all duration-300 hover:scale-110 {currentHeroSlide === i ? 'bg-yellow-400 shadow-lg' : 'bg-white/60 hover:bg-white/80'}"
+                ></button>
+                {/each}
+              </div>
+              
+
             </div>
+            
+            <!-- Dynamic Floating Mini Images -->
+            {#each heroSlides as slide, i}
+              {#if i !== currentHeroSlide}
+                <div 
+                  class="absolute w-16 h-16 rounded-full overflow-hidden shadow-lg border-4 border-white hover:scale-110 transition-all duration-500 animate-pulse"
+                  style="
+                    {i === 0 ? 'top: -16px; right: -16px; width: 80px; height: 80px;' : ''}
+                    {i === 1 ? 'bottom: -16px; left: -16px; width: 64px; height: 64px;' : ''}
+                    {i === 2 ? 'top: 50%; right: -24px; width: 48px; height: 48px;' : ''}
+                    {i === 3 ? 'top: 20%; left: -20px; width: 56px; height: 56px;' : ''}
+                  "
+                >
+                  <img
+                    src={slide.image}
+                    alt={slide.title}
+                    class="w-full h-full object-cover hover:scale-110 transition-transform duration-300"
+                  />
+                </div>
+              {/if}
+            {/each}
           </div>
         </div>
       </div>
@@ -358,51 +507,25 @@
           ></div>
         </div>
 
-        <div class="grid md:grid-cols-3 gap-8">
+        <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
           <!-- Menu Item 1 -->
           <div
             class="bg-white rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border border-orange-100"
           >
-            <div
-              class="bg-gradient-to-br from-red-500 to-orange-500 h-48 rounded-t-xl flex items-center justify-center"
-            >
-              <span class="text-6xl">🥩</span>
+            <div class="h-48 rounded-t-xl overflow-hidden">
+              <img
+                src={dimsumOriginal}
+                alt="Dimsum Original"
+                class="w-full h-full object-cover hover:scale-110 transition-transform duration-300"
+              />
             </div>
             <div class="p-6">
               <h3 class="text-xl font-bold text-red-600 mb-2">
-                Babi Panggang Spesial
+                Dimsum Original
               </h3>
               <p class="text-gray-600 mb-4">
-                Babi panggang dengan bumbu rahasia yang gurih dan lezat, dimasak
-                dengan teknik tradisional
-              </p>
-              <div class="flex justify-between items-center">
-                <span class="text-2xl font-bold text-orange-500"
-                  >Rp 45.000</span
-                >
-                <button
-                  class="bg-red-500 text-white px-4 py-2 rounded-full hover:bg-red-600 transition-colors"
-                >
-                  Pesan
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <!-- Menu Item 2 -->
-          <div
-            class="bg-white rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border border-orange-100"
-          >
-            <div
-              class="bg-gradient-to-br from-orange-500 to-red-500 h-48 rounded-t-xl flex items-center justify-center"
-            >
-              <span class="text-6xl">🍜</span>
-            </div>
-            <div class="p-6">
-              <h3 class="text-xl font-bold text-red-600 mb-2">Mie Ayam Babi</h3>
-              <p class="text-gray-600 mb-4">
-                Mie ayam dengan topping babi cincang yang nikmat, disajikan
-                dengan kuah gurih
+                Dimsum klasik dengan isian daging segar dan kulit yang lembut,
+                disajikan dengan saus spesial yang menggugah selera
               </p>
               <div class="flex justify-between items-center">
                 <span class="text-2xl font-bold text-orange-500"
@@ -417,26 +540,90 @@
             </div>
           </div>
 
+          <!-- Menu Item 2 -->
+          <div
+            class="bg-white rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border border-orange-100"
+          >
+            <div class="h-48 rounded-t-xl overflow-hidden">
+              <img
+                src={dimsumMentai}
+                alt="Dimsum Mentai"
+                class="w-full h-full object-cover hover:scale-110 transition-transform duration-300"
+              />
+            </div>
+            <div class="p-6">
+              <h3 class="text-xl font-bold text-red-600 mb-2">Dimsum Mentai</h3>
+              <p class="text-gray-600 mb-4">
+                Dimsum istimewa dengan topping saus mentai yang creamy dan gurih,
+                memberikan sensasi rasa yang unik dan lezat
+              </p>
+              <div class="flex justify-between items-center">
+                <span class="text-2xl font-bold text-orange-500"
+                  >Rp 30.000</span
+                >
+                <button
+                  class="bg-red-500 text-white px-4 py-2 rounded-full hover:bg-red-600 transition-colors"
+                >
+                  Pesan
+                </button>
+              </div>
+            </div>
+          </div>
+
           <!-- Menu Item 3 -->
           <div
             class="bg-white rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border border-orange-100"
           >
-            <div
-              class="bg-gradient-to-br from-red-600 to-orange-400 h-48 rounded-t-xl flex items-center justify-center"
-            >
-              <span class="text-6xl">🍲</span>
+            <div class="h-48 rounded-t-xl overflow-hidden">
+              <img
+                src={dimsumGorengKeju}
+                alt="Dimsum Goreng Keju"
+                class="w-full h-full object-cover hover:scale-110 transition-transform duration-300"
+              />
             </div>
             <div class="p-6">
               <h3 class="text-xl font-bold text-red-600 mb-2">
-                Sup Babi Asam Manis
+                Dimsum Goreng Keju
               </h3>
               <p class="text-gray-600 mb-4">
-                Sup babi dengan kuah asam manis yang segar, diperkaya dengan
-                sayuran pilihan
+                Dimsum goreng yang crispy dengan isian keju yang melted,
+                perpaduan sempurna tekstur renyah dan gurih
               </p>
               <div class="flex justify-between items-center">
                 <span class="text-2xl font-bold text-orange-500"
-                  >Rp 35.000</span
+                  >Rp 28.000</span
+                >
+                <button
+                  class="bg-red-500 text-white px-4 py-2 rounded-full hover:bg-red-600 transition-colors"
+                >
+                  Pesan
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Menu Item 4 -->
+          <div
+            class="bg-white rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border border-orange-100"
+          >
+            <div class="h-48 rounded-t-xl overflow-hidden">
+              <img
+                src={gyoza}
+                alt="Gyoza"
+                class="w-full h-full object-cover hover:scale-110 transition-transform duration-300"
+              />
+            </div>
+            <div class="p-6">
+              <h3 class="text-xl font-bold text-red-600 mb-2">
+                Gyoza Premium
+              </h3>
+              <p class="text-gray-600 mb-4">
+                Gyoza dengan isian daging dan sayuran segar, digoreng hingga
+                golden crispy di bagian bawah dan kukus lembut di atasnya
+              </p>
+              <div class="flex justify-between items-center">
+                <span class="text-2xl font-bold text-orange-500"
+                  >Rp 32.000</span
                 >
                 <button
                   class="bg-red-500 text-white px-4 py-2 rounded-full hover:bg-red-600 transition-colors"
@@ -502,40 +689,68 @@
             >
               <!-- Slides -->
               <div class="slide-container">
-                <!-- Slide 1 - Cabang Jakarta Selatan -->
-                <div
-                  class="slide active bg-gradient-to-br from-red-500 to-orange-500 p-8 text-white text-center min-h-[300px] flex flex-col justify-center"
-                >
-                  <div class="text-6xl mb-4">🏢</div>
-                  <h3 class="text-2xl font-bold mb-2">
-                    Cabang Jakarta Selatan
-                  </h3>
-                  <p class="text-lg mb-2">Jl. Kemang Raya No. 45</p>
-                  <p class="text-sm opacity-90">
-                    Cabang pertama dan terbesar kami
-                  </p>
+                <!-- Slide 1 - Dimsum Original -->
+                <div class="slide active min-h-[300px] relative">
+                  <img
+                    src={dimsumOriginal}
+                    alt="Dimsum Original"
+                    class="w-full h-full object-cover rounded-2xl"
+                  />
+                  <div class="absolute inset-0 bg-black bg-opacity-40 rounded-2xl flex flex-col justify-center items-center text-white p-8">
+                    <h3 class="text-2xl font-bold mb-2">
+                      Dimsum Original
+                    </h3>
+                    <p class="text-lg mb-2">Rasa Klasik yang Tak Terlupakan</p>
+                    <p class="text-sm opacity-90">
+                      Dengan isian daging segar dan kulit yang lembut
+                    </p>
+                  </div>
                 </div>
 
-                <!-- Slide 2 - Cabang Jakarta Pusat -->
-                <div
-                  class="slide bg-gradient-to-br from-orange-500 to-red-600 p-8 text-white text-center min-h-[300px] flex flex-col justify-center"
-                >
-                  <div class="text-6xl mb-4">🏪</div>
-                  <h3 class="text-2xl font-bold mb-2">Cabang Jakarta Pusat</h3>
-                  <p class="text-lg mb-2">Jl. Sudirman No. 123</p>
-                  <p class="text-sm opacity-90">Di jantung kota Jakarta</p>
+                <!-- Slide 2 - Dimsum Mentai -->
+                <div class="slide min-h-[300px] relative">
+                  <img
+                    src={dimsumMentai}
+                    alt="Dimsum Mentai"
+                    class="w-full h-full object-cover rounded-2xl"
+                  />
+                  <div class="absolute inset-0 bg-black bg-opacity-40 rounded-2xl flex flex-col justify-center items-center text-white p-8">
+                    <h3 class="text-2xl font-bold mb-2">Dimsum Mentai</h3>
+                    <p class="text-lg mb-2">Inovasi Rasa yang Memukau</p>
+                    <p class="text-sm opacity-90">Dengan saus mentai yang creamy dan gurih</p>
+                  </div>
                 </div>
 
-                <!-- Slide 3 - Cabang Bekasi -->
-                <div
-                  class="slide bg-gradient-to-br from-red-600 to-orange-400 p-8 text-white text-center min-h-[300px] flex flex-col justify-center"
-                >
-                  <div class="text-6xl mb-4">🏬</div>
-                  <h3 class="text-2xl font-bold mb-2">Cabang Bekasi</h3>
-                  <p class="text-lg mb-2">Jl. Ahmad Yani No. 78</p>
-                  <p class="text-sm opacity-90">
-                    Melayani wilayah Bekasi dan sekitarnya
-                  </p>
+                <!-- Slide 3 - Gyoza -->
+                <div class="slide min-h-[300px] relative">
+                  <img
+                    src={gyoza}
+                    alt="Gyoza Premium"
+                    class="w-full h-full object-cover rounded-2xl"
+                  />
+                  <div class="absolute inset-0 bg-black bg-opacity-40 rounded-2xl flex flex-col justify-center items-center text-white p-8">
+                    <h3 class="text-2xl font-bold mb-2">Gyoza Premium</h3>
+                    <p class="text-lg mb-2">Kelezatan Jepang Autentik</p>
+                    <p class="text-sm opacity-90">
+                      Crispy di bawah, lembut di atas
+                    </p>
+                  </div>
+                </div>
+
+                <!-- Slide 4 - Dimsum Goreng Keju -->
+                <div class="slide min-h-[300px] relative">
+                  <img
+                    src={dimsumGorengKeju}
+                    alt="Dimsum Goreng Keju"
+                    class="w-full h-full object-cover rounded-2xl"
+                  />
+                  <div class="absolute inset-0 bg-black bg-opacity-40 rounded-2xl flex flex-col justify-center items-center text-white p-8">
+                    <h3 class="text-2xl font-bold mb-2">Dimsum Goreng Keju</h3>
+                    <p class="text-lg mb-2">Perpaduan Sempurna</p>
+                    <p class="text-sm opacity-90">
+                      Renyah dengan keju yang melted
+                    </p>
+                  </div>
                 </div>
 
                 <!-- Slide 4 - Cabang Depok -->
@@ -553,27 +768,20 @@
               <div
                 class="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2"
               >
+                {#each Array(4) as _, i}
                 <button
-                  class="slide-dot active w-3 h-3 rounded-full bg-white"
-                  data-slide="0"
+                  on:click={() => goToSlide(i)}
+                  aria-label="Go to slide {i + 1}"
+                  class="w-3 h-3 rounded-full bg-white transition-opacity duration-300 {currentSlide === i ? 'opacity-100' : 'opacity-50'}"
                 ></button>
-                <button
-                  class="slide-dot w-3 h-3 rounded-full bg-white opacity-50"
-                  data-slide="1"
-                ></button>
-                <button
-                  class="slide-dot w-3 h-3 rounded-full bg-white opacity-50"
-                  data-slide="2"
-                ></button>
-                <button
-                  class="slide-dot w-3 h-3 rounded-full bg-white opacity-50"
-                  data-slide="3"
-                ></button>
+                {/each}
               </div>
 
               <!-- Navigation Arrows -->
               <button
-                class="slide-prev absolute left-4 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-20 hover:bg-opacity-30 text-white p-2 rounded-full transition-all duration-300"
+                on:click={prevSlide}
+                aria-label="Previous slide"
+                class="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-20 hover:bg-opacity-30 text-white p-2 rounded-full transition-all duration-300"
               >
                 <svg
                   class="w-6 h-6"
@@ -591,7 +799,9 @@
               </button>
 
               <button
-                class="slide-next absolute right-4 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-20 hover:bg-opacity-30 text-white p-2 rounded-full transition-all duration-300"
+                on:click={nextSlide}
+                aria-label="Next slide"
+                class="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-20 hover:bg-opacity-30 text-white p-2 rounded-full transition-all duration-300"
               >
                 <svg
                   class="w-6 h-6"
@@ -810,18 +1020,7 @@
     transform: translateX(0);
   }
 
-  .slide-dot {
-    cursor: pointer;
-    transition: all 0.3s ease;
-  }
 
-  .slide-dot:hover {
-    opacity: 0.8 !important;
-  }
-
-  .slide-dot.active {
-    opacity: 1 !important;
-  }
 </style>
 
 

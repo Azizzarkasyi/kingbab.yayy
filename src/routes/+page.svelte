@@ -4,7 +4,18 @@
   import dimsumMentai from '$lib/assets/dimsum mentai.jpg';
   import dimsumOriginal from '$lib/assets/dimsum original.jpg';
   import gyoza from '$lib/assets/gyoza.jpg';
+  import cabangUnisa from '$lib/assets/cabang 1 Unisa.jpg';
+  import cabangUmy from '$lib/assets/cabang 2 Umy.jpg';
+  import cabangGodean from '$lib/assets/cabang 3 Godean.jpg';
+  import { branches } from '$lib/branches';
   import { onMount } from 'svelte';
+  
+  // Map branch images
+  const branchImages: Record<string, string> = {
+    'cabang 1 Unisa.jpg': cabangUnisa,
+    'cabang 2 Umy.jpg': cabangUmy,
+    'cabang 3 Godean.jpg': cabangGodean
+  };
 
   let isMenuOpen = false;
   let showScrollTop = false;
@@ -68,12 +79,14 @@
   }
   
   // Slideshow functionality
+  const totalSlides = branches.length;
+  
   function nextSlide() {
-    currentSlide = (currentSlide + 1) % 4; // 4 slides now
+    currentSlide = (currentSlide + 1) % totalSlides;
   }
   
   function prevSlide() {
-    currentSlide = currentSlide === 0 ? 3 : currentSlide - 1;
+    currentSlide = currentSlide === 0 ? totalSlides - 1 : currentSlide - 1;
   }
   
   function goToSlide(index: number) {
@@ -643,132 +656,102 @@
       class="py-16 bg-gradient-to-br from-orange-50 to-red-50"
     >
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="grid md:grid-cols-2 gap-12 items-center">
-          <div>
-            <h2 class="text-4xl font-bold text-red-600 mb-6">
-              Tentang kingbab.yayy
-            </h2>
+        <!-- Tentang Info -->
+        <div class="text-center mb-12">
+          <h2 class="text-4xl font-bold text-red-600 mb-6">
+            Tentang kingbab.yayy
+          </h2>
+          <div class="max-w-3xl mx-auto">
             <p class="text-gray-700 text-lg mb-6 leading-relaxed">
               kingbab.yayy adalah UMKM kuliner yang berkomitmen menghadirkan
               cita rasa autentik dengan kualitas terbaik. Kami menggunakan
               bahan-bahan segar dan bumbu pilihan untuk menciptakan pengalaman
               kuliner yang tak terlupakan.
             </p>
+          </div>
+        </div>
+        
+        <!-- Lokasi Cabang -->
+        <div class="grid md:grid-cols-5 gap-8 items-start mb-12">
+          <div class="md:col-span-3">
+            <h3 class="text-3xl font-bold text-red-600 mb-6">
+              Lokasi Cabang Kami
+            </h3>
+            <p class="text-gray-700 text-lg mb-6 leading-relaxed">
+              Kami hadir di beberapa lokasi strategis di Yogyakarta untuk melayani Anda dengan lebih baik. 
+              Setiap cabang dirancang dengan suasana yang nyaman dan pelayanan terbaik.
+            </p>
+            
+            <!-- Cabang List -->
+            <div class="space-y-4 mb-6">
+              {#each branches as branch, i}
+              <button
+                on:click={() => goToSlide(i)}
+                class="w-full text-left p-4 rounded-xl transition-all duration-300 {currentSlide === i ? 'bg-red-50 border-2 border-red-500' : 'bg-white border-2 border-gray-200 hover:border-red-300'}"
+              >
+                <div class="flex items-start space-x-3">
+                  <div class="bg-red-500 text-white p-2 rounded-full mt-1 flex-shrink-0">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    </svg>
+                  </div>
+                  <div class="flex-1">
+                    <h4 class="font-bold text-gray-900 mb-1">{branch.name}</h4>
+                    <p class="text-sm text-gray-600">{branch.address}</p>
+                  </div>
+                  {#if currentSlide === i}
+                  <div class="text-red-500 mt-1">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                    </svg>
+                  </div>
+                  {/if}
+                </div>
+              </button>
+              {/each}
+            </div>
 
-            <div class="space-y-4">
-              <div class="flex items-center space-x-4">
-                <div class="bg-red-500 text-white p-2 rounded-full">
-                  <span class="text-xl">✨</span>
+            <!-- Info -->
+            <div class="bg-gradient-to-r from-red-50 to-orange-50 p-4 rounded-xl border-l-4 border-red-500">
+              <div class="flex items-start space-x-3">
+                <div class="text-red-500 text-2xl">💡</div>
+                <div>
+                  <h4 class="font-bold text-gray-900 mb-1">Tips Kunjungan</h4>
+                  <p class="text-sm text-gray-600">Hubungi cabang terdekat untuk reservasi atau informasi promo terbaru!</p>
                 </div>
-                <span class="text-gray-700 font-medium"
-                  >Bahan Segar Berkualitas Tinggi</span
-                >
-              </div>
-              <div class="flex items-center space-x-4">
-                <div class="bg-orange-500 text-white p-2 rounded-full">
-                  <span class="text-xl">👨‍🍳</span>
-                </div>
-                <span class="text-gray-700 font-medium"
-                  >Chef Berpengalaman & Terlatih</span
-                >
-              </div>
-              <div class="flex items-center space-x-4">
-                <div class="bg-red-600 text-white p-2 rounded-full">
-                  <span class="text-xl">💯</span>
-                </div>
-                <span class="text-gray-700 font-medium"
-                  >Cita Rasa Autentik Terjamin</span
-                >
               </div>
             </div>
           </div>
-          <div class="relative">
-            <!-- Slideshow Container -->
+          
+          <!-- Slideshow Container -->
+          <div class="md:col-span-2 relative">
             <div
               class="relative bg-white rounded-3xl shadow-2xl overflow-hidden"
             >
               <!-- Slides -->
               <div class="slide-container">
-                <!-- Slide 1 - Dimsum Original -->
-                <div class="slide active min-h-[300px] relative">
+                {#each branches as branch, i}
+                <div class="slide {currentSlide === i ? 'active' : ''} relative">
                   <img
-                    src={dimsumOriginal}
-                    alt="Dimsum Original"
-                    class="w-full h-full object-cover rounded-2xl"
+                    src={branchImages[branch.image]}
+                    alt={branch.name}
+                    class="w-full h-auto rounded-2xl"
                   />
-                  <div class="absolute inset-0 bg-black bg-opacity-40 rounded-2xl flex flex-col justify-center items-center text-white p-8">
-                    <h3 class="text-2xl font-bold mb-2">
-                      Dimsum Original
-                    </h3>
-                    <p class="text-lg mb-2">Rasa Klasik yang Tak Terlupakan</p>
-                    <p class="text-sm opacity-90">
-                      Dengan isian daging segar dan kulit yang lembut
-                    </p>
+                  <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent rounded-2xl flex flex-col justify-end items-center text-white p-4">
+                    <div class="bg-red-600 bg-opacity-95 px-3 py-1 rounded-full text-xs font-bold shadow-lg">
+                      {branch.name}
+                    </div>
                   </div>
                 </div>
-
-                <!-- Slide 2 - Dimsum Mentai -->
-                <div class="slide min-h-[300px] relative">
-                  <img
-                    src={dimsumMentai}
-                    alt="Dimsum Mentai"
-                    class="w-full h-full object-cover rounded-2xl"
-                  />
-                  <div class="absolute inset-0 bg-black bg-opacity-40 rounded-2xl flex flex-col justify-center items-center text-white p-8">
-                    <h3 class="text-2xl font-bold mb-2">Dimsum Mentai</h3>
-                    <p class="text-lg mb-2">Inovasi Rasa yang Memukau</p>
-                    <p class="text-sm opacity-90">Dengan saus mentai yang creamy dan gurih</p>
-                  </div>
-                </div>
-
-                <!-- Slide 3 - Gyoza -->
-                <div class="slide min-h-[300px] relative">
-                  <img
-                    src={gyoza}
-                    alt="Gyoza Premium"
-                    class="w-full h-full object-cover rounded-2xl"
-                  />
-                  <div class="absolute inset-0 bg-black bg-opacity-40 rounded-2xl flex flex-col justify-center items-center text-white p-8">
-                    <h3 class="text-2xl font-bold mb-2">Gyoza Premium</h3>
-                    <p class="text-lg mb-2">Kelezatan Jepang Autentik</p>
-                    <p class="text-sm opacity-90">
-                      Crispy di bawah, lembut di atas
-                    </p>
-                  </div>
-                </div>
-
-                <!-- Slide 4 - Dimsum Goreng Keju -->
-                <div class="slide min-h-[300px] relative">
-                  <img
-                    src={dimsumGorengKeju}
-                    alt="Dimsum Goreng Keju"
-                    class="w-full h-full object-cover rounded-2xl"
-                  />
-                  <div class="absolute inset-0 bg-black bg-opacity-40 rounded-2xl flex flex-col justify-center items-center text-white p-8">
-                    <h3 class="text-2xl font-bold mb-2">Dimsum Goreng Keju</h3>
-                    <p class="text-lg mb-2">Perpaduan Sempurna</p>
-                    <p class="text-sm opacity-90">
-                      Renyah dengan keju yang melted
-                    </p>
-                  </div>
-                </div>
-
-                <!-- Slide 4 - Cabang Depok -->
-                <div
-                  class="slide bg-gradient-to-br from-orange-400 to-red-500 p-8 text-white text-center min-h-[300px] flex flex-col justify-center"
-                >
-                  <div class="text-6xl mb-4">�</div>
-                  <h3 class="text-2xl font-bold mb-2">Cabang Depok</h3>
-                  <p class="text-lg mb-2">Jl. Margonda Raya No. 234</p>
-                  <p class="text-sm opacity-90">Dekat kampus UI</p>
-                </div>
+                {/each}
               </div>
 
               <!-- Navigation Dots -->
               <div
                 class="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2"
               >
-                {#each Array(4) as _, i}
+                {#each branches as _, i}
                 <button
                   on:click={() => goToSlide(i)}
                   aria-label="Go to slide {i + 1}"
@@ -777,55 +760,36 @@
                 {/each}
               </div>
 
-              <!-- Navigation Arrows -->
-              <button
-                on:click={prevSlide}
-                aria-label="Previous slide"
-                class="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-20 hover:bg-opacity-30 text-white p-2 rounded-full transition-all duration-300"
-              >
-                <svg
-                  class="w-6 h-6"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M15 19l-7-7 7-7"
-                  ></path>
-                </svg>
-              </button>
-
-              <button
-                on:click={nextSlide}
-                aria-label="Next slide"
-                class="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-20 hover:bg-opacity-30 text-white p-2 rounded-full transition-all duration-300"
-              >
-                <svg
-                  class="w-6 h-6"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M9 5l7 7-7 7"
-                  ></path>
-                </svg>
-              </button>
             </div>
 
             <!-- Slide Counter -->
-            <div class="text-center mt-4">
-              <span class="text-gray-600 text-sm">
-                <span id="current-slide">1</span> /
-                <span id="total-slides">4</span> Cabang
+            <div class="text-center mt-3">
+              <span class="text-gray-600 text-xs font-medium">
+                Foto {currentSlide + 1} dari {totalSlides}
               </span>
             </div>
+          </div>
+        </div>
+        
+        <!-- Features -->
+        <div class="grid md:grid-cols-3 gap-8 mt-12 max-w-4xl mx-auto">
+          <div class="flex flex-col items-center text-center">
+            <div class="bg-red-500 text-white p-4 rounded-full mb-4">
+              <span class="text-3xl">✨</span>
+            </div>
+            <span class="text-gray-700 font-medium">Bahan Segar Berkualitas Tinggi</span>
+          </div>
+          <div class="flex flex-col items-center text-center">
+            <div class="bg-orange-500 text-white p-4 rounded-full mb-4">
+              <span class="text-3xl">👨‍🍳</span>
+            </div>
+            <span class="text-gray-700 font-medium">Chef Berpengalaman & Terlatih</span>
+          </div>
+          <div class="flex flex-col items-center text-center">
+            <div class="bg-red-600 text-white p-4 rounded-full mb-4">
+              <span class="text-3xl">💯</span>
+            </div>
+            <span class="text-gray-700 font-medium">Cita Rasa Autentik Terjamin</span>
           </div>
         </div>
       </div>
@@ -1002,7 +966,7 @@
   .slide-container {
     position: relative;
     width: 100%;
-    height: 300px;
+    min-height: 400px;
   }
 
   .slide {
@@ -1010,14 +974,16 @@
     top: 0;
     left: 0;
     width: 100%;
+    height: 100%;
     opacity: 0;
-    transform: translateX(100%);
-    transition: all 0.5s ease-in-out;
+    visibility: hidden;
+    transition: opacity 0.5s ease-in-out, visibility 0.5s;
   }
 
   .slide.active {
     opacity: 1;
-    transform: translateX(0);
+    visibility: visible;
+    position: relative;
   }
 
 
